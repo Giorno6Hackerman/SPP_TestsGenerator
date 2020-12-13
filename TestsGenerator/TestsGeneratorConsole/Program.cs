@@ -9,11 +9,22 @@ namespace TestsGeneratorConsole
 {
     class Program
     {
-        private static string _destinationFolder;
+        private static string _destinationFolder = "C:\\5 sem\\SPP\\Labs\\Lab_4\\TestClasses";
+        private static int _maxTasksCount = 2;
+        private static int _maxLoadedFilesCount = 2;
+        private static int _maxStoredFilesCount = 2;
+        private static List<string> _files = new List<string>()
+        {
+            "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\AssemblyInfo.cs",
+            "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\BooleanGenerator.cs",
+            "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\Browser.cs",
+            "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\ByteGenerator.cs",
+            "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\CharGenerator.cs",
+            "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\Generator.cs",
+        };
 
         static void Main(string[] args)
-        {
-            List<string> _files = new List<string>();
+        {/*
             Console.WriteLine("Enter file's path(or 0 to finish): ");
             // + check file existing
             string path;
@@ -25,29 +36,28 @@ namespace TestsGeneratorConsole
             }
 
             Console.WriteLine("Enter max tasks count: ");
-            int _maxTasksCount = Int32.Parse(Console.ReadLine());
+            _maxTasksCount = Int32.Parse(Console.ReadLine());
 
             Console.WriteLine("Enter max loaded files count: ");
-            int _maxLoadedFilesCount = Int32.Parse(Console.ReadLine());
-            double x = 1 + 1;
+            _maxLoadedFilesCount = Int32.Parse(Console.ReadLine());
+            
             Console.WriteLine("Enter max stored files count: ");
-            int _maxStoredFilesCount = Int32.Parse(Console.ReadLine());
+            _maxStoredFilesCount = Int32.Parse(Console.ReadLine());
 
             // + check dir existing
             Console.WriteLine("Enter destination folder path: ");
             _destinationFolder = Console.ReadLine();
-
-            // call loader(_files, _maxLoadedFilesCount)
-            // 
-            // call generator(fromLoader, _maxTasksCount)
-            // call writer(fromgenerator, _destinationFolder, _maxStoredFilesCount
+            */
 
             var loadBlock = new TransformBlock<string, string>(LoadText, new ExecutionDataflowBlockOptions() 
                                                                 { MaxDegreeOfParallelism = _maxLoadedFilesCount });
-            var generateBlock = new TransformBlock<string, string>(TestsGenerator.GenerateTest, new ExecutionDataflowBlockOptions()
+            var generateBlock = new TransformBlock<string, TestClass>(TestsGenerator.GenerateTest, new ExecutionDataflowBlockOptions()
                                                                     { MaxDegreeOfParallelism = _maxTasksCount });
             var writeBlock = new ActionBlock<TestClass>(WriteFile, new ExecutionDataflowBlockOptions()
                                                            { MaxDegreeOfParallelism = _maxStoredFilesCount });
+
+            loadBlock.LinkTo(generateBlock);
+            generateBlock.LinkTo(writeBlock);
         }
 
         public static async Task<string> LoadText(string path)
