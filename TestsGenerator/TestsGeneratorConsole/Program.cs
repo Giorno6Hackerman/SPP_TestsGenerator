@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using TestsGeneratorLibrary;
 
 namespace TestsGeneratorConsole
 {
     class Program
     {
+        private static string _destinationFolder;
+
         static void Main(string[] args)
         {
             List<string> _files = new List<string>();
@@ -32,15 +35,22 @@ namespace TestsGeneratorConsole
 
             // + check dir existing
             Console.WriteLine("Enter destination folder path: ");
-            string _destinationFolder = Console.ReadLine();
+            _destinationFolder = Console.ReadLine();
 
             // call loader(_files, _maxLoadedFilesCount)
             // 
             // call generator(fromLoader, _maxTasksCount)
-            // call writer(fromgenerator, _destinationFolder, _maxStoredFilesCount)
+            // call writer(fromgenerator, _destinationFolder, _maxStoredFilesCount
+
+            var loadBlock = new TransformBlock<string, string>(LoadText, new ExecutionDataflowBlockOptions() 
+                                                                { MaxDegreeOfParallelism = _maxLoadedFilesCount });
+            var generateBlock = new TransformBlock<string, string>(TestsGenerator.GenerateTest, new ExecutionDataflowBlockOptions()
+                                                                    { MaxDegreeOfParallelism = _maxTasksCount });
+            var writeBlock = new ActionBlock<TestClass>(WriteFile, new ExecutionDataflowBlockOptions()
+                                                           { MaxDegreeOfParallelism = _maxStoredFilesCount });
         }
 
-        public async Task<string> LoadText(string path)
+        public static async Task<string> LoadText(string path)
         {
             using (StreamReader reader = File.OpenText(path))
             {
@@ -48,9 +58,12 @@ namespace TestsGeneratorConsole
             }
         }
 
-        public async Task WriteFile()
+        public static async Task WriteFile(TestClass test)
         {
-            // await WriteAsync
+            using (StreamWriter writer = File.CreateText(_destinationFolder + "\\" + test.Name))
+            {
+                await writer.WriteAsync(test.Text);
+            }
         }
     }
 }
