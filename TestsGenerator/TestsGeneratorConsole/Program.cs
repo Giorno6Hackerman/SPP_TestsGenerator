@@ -13,7 +13,7 @@ namespace TestsGeneratorConsole
         private static int _maxTasksCount = 2;
         private static int _maxLoadedFilesCount = 2;
         private static int _maxStoredFilesCount = 2;
-        private static List<string> _files = new List<string>()
+        private static string[] _files = new []
         {
             "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\AssemblyInfo.cs",
             "C:\\5 sem\\SPP\\Labs\\Lab_4\\Classes\\BooleanGenerator.cs",
@@ -49,25 +49,44 @@ namespace TestsGeneratorConsole
             _destinationFolder = Console.ReadLine();
             */
 
-            var loadBlock = new TransformBlock<string, string>(LoadText, new ExecutionDataflowBlockOptions() 
-                                                                { MaxDegreeOfParallelism = _maxLoadedFilesCount });
-            var generateBlock = new TransformBlock<string, TestClass>(TestsGenerator.GenerateTest, new ExecutionDataflowBlockOptions()
-                                                                    { MaxDegreeOfParallelism = _maxTasksCount });
-            var writeBlock = new ActionBlock<TestClass>(WriteFile, new ExecutionDataflowBlockOptions()
+            var loadBlock = new TransformBlock<string, string>(async path =>
+            {
+                using (StreamReader reader = File.OpenText(path))
+                {
+                    return await reader.ReadToEndAsync();
+                }
+            }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _maxLoadedFilesCount });
+
+            var generateBlock = new TransformBlock<string, TestClass>(async file =>
+            {
+                TestsGenerator generator = new TestsGenerator();
+                return await generator.GenerateTest(file);
+            }, new ExecutionDataflowBlockOptions{ MaxDegreeOfParallelism = _maxTasksCount });
+
+            var writeBlock = new ActionBlock<TestClass>(async test =>
+            {
+                using (StreamWriter writer = File.CreateText(_destinationFolder + "\\" + test.Name))
+                {
+                    await writer.WriteAsync(test.Text);
+                }
+            }, new ExecutionDataflowBlockOptions
                                                            { MaxDegreeOfParallelism = _maxStoredFilesCount });
 
-            loadBlock.LinkTo(generateBlock);
-            generateBlock.LinkTo(writeBlock);
-
+            var linkOptions = new DataflowLinkOptions { PropagateCompletion = true };
+            loadBlock.LinkTo(generateBlock, linkOptions);
+            generateBlock.LinkTo(writeBlock, linkOptions);
+            Console.WriteLine("Start");
             foreach (var file in _files)
             {
-                loadBlock.SendAsync(file);
+                loadBlock.Post(file);
             }
 
             loadBlock.Complete();
             writeBlock.Completion.Wait();
+            //Console.ReadKey();
+            Console.WriteLine("Done");
         }
-
+        /*
         public static async Task<string> LoadText(string path)
         {
             using (StreamReader reader = File.OpenText(path))
@@ -82,6 +101,6 @@ namespace TestsGeneratorConsole
             {
                 await writer.WriteAsync(test.Text);
             }
-        }
+        }*/
     }
 }
