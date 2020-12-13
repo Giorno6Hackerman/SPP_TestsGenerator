@@ -58,6 +58,14 @@ namespace TestsGeneratorConsole
 
             loadBlock.LinkTo(generateBlock);
             generateBlock.LinkTo(writeBlock);
+
+            foreach (var file in _files)
+            {
+                loadBlock.SendAsync(file);
+            }
+
+            loadBlock.Complete();
+            writeBlock.Completion.Wait();
         }
 
         public static async Task<string> LoadText(string path)
