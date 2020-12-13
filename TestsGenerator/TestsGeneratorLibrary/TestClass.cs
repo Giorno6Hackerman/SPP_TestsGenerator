@@ -4,11 +4,11 @@ namespace TestsGeneratorLibrary
 {
     public class TestClass
     {
-        private StringBuilder _text = new StringBuilder();
+        //private StringBuilder _text = new StringBuilder();
 
         public string Name { get; set; }
-        public string Text 
-        {
+        public string Text { get; set; }
+        /*{
             get 
             {
                 return _text.ToString();    
@@ -17,6 +17,6 @@ namespace TestsGeneratorLibrary
             {
                 _text.Append(value);
             } 
-        }
+        }*/
     }
 }
