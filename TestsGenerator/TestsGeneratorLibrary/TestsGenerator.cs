@@ -12,9 +12,9 @@ namespace TestsGeneratorLibrary
             _maxTaskCount = maxTasksCount;
         }
 
-        public async Task GenerateTest()
-        { 
-            
+        public static async Task<string> GenerateTest(string file)
+        {
+            return null;
         }
     }
 }
