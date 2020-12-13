@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TestsGeneratorLibrary
 {
@@ -9,6 +10,11 @@ namespace TestsGeneratorLibrary
         public TestsGenerator(int maxTasksCount)
         {
             _maxTaskCount = maxTasksCount;
+        }
+
+        public async Task GenerateTest()
+        { 
+            
         }
     }
 }
