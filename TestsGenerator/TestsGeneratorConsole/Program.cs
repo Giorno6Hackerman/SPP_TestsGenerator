@@ -51,6 +51,7 @@ namespace TestsGeneratorConsole
 
             var loadBlock = new TransformBlock<string, string>(async path =>
             {
+                Console.WriteLine("Loading " + path);
                 using (StreamReader reader = File.OpenText(path))
                 {
                     return await reader.ReadToEndAsync();
@@ -69,6 +70,7 @@ namespace TestsGeneratorConsole
                 {
                     await writer.WriteAsync(test.Text);
                 }
+                Console.WriteLine("Saved " + test.Name);
             }, new ExecutionDataflowBlockOptions
                                                            { MaxDegreeOfParallelism = _maxStoredFilesCount });
 
@@ -86,21 +88,5 @@ namespace TestsGeneratorConsole
             //Console.ReadKey();
             Console.WriteLine("Done");
         }
-        /*
-        public static async Task<string> LoadText(string path)
-        {
-            using (StreamReader reader = File.OpenText(path))
-            {
-                return await reader.ReadToEndAsync();
-            }
-        }
-
-        public static async Task WriteFile(TestClass test)
-        {
-            using (StreamWriter writer = File.CreateText(_destinationFolder + "\\" + test.Name))
-            {
-                await writer.WriteAsync(test.Text);
-            }
-        }*/
     }
 }
