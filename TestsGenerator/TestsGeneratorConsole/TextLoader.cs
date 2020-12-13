@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TestsGeneratorConsole
 {
@@ -11,6 +12,11 @@ namespace TestsGeneratorConsole
         public TextLoader(int maxLoadedFilesCount)
         {
             _maxLoadedFilesCount = maxLoadedFilesCount;
+        }
+
+        public async Task LoadText()
+        { 
+        
         }
     }
 }
